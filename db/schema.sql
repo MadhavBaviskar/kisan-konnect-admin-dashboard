@@ -6,7 +6,7 @@
 CREATE DATABASE IF NOT EXISTS kisan_konnect_db;
 USE kisan_konnect_db;
 
--- ============================================
+-- ============================================     
 -- 1. Admins Table
 -- ============================================
 CREATE TABLE admins (
@@ -24,8 +24,8 @@ CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     category VARCHAR(100) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
     unit VARCHAR(50) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
     stock_quantity INT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
