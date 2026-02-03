@@ -1,13 +1,47 @@
 import pool from "../db";
 
-export async function getAllProducts() {
+export async function getAllProducts(options: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+}) {
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    category = "",
+  } = options;
+
+  const offset = (page - 1) * limit;
+
+  let whereClause = "WHERE 1=1";
+  const values: any[] = [];
+
+  if (search) {
+    whereClause += " AND name LIKE ?";
+    values.push(`%${search}%`);
+  }
+
+  if (category) {
+    whereClause += " AND category = ?";
+    values.push(category);
+  }
+
   const [rows] = await pool.query(
-    `SELECT id, name,category,unit, price, stock_quantity, created_at
-     FROM products
-     ORDER BY created_at DESC`
+    `
+    SELECT id, name, category, unit, price, stock_quantity, created_at
+    FROM products
+    ${whereClause}
+    ORDER BY created_at DESC
+    LIMIT ? OFFSET ?
+    `,
+    [...values, limit, offset]
   );
+
   return rows;
 }
+
 
 export async function createProduct(data: {
   name: string;

@@ -1,18 +1,32 @@
 import { NextResponse } from "next/server";
 import { getAllProducts, createProduct } from "@/lib/services/product.service";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const products = await getAllProducts();
+    const { searchParams } = new URL(request.url);
+
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 10;
+    const search = searchParams.get("search") || "";
+    const category = searchParams.get("category") || "";
+
+    const products = await getAllProducts({
+      page,
+      limit,
+      search,
+      category,
+    });
+
     return NextResponse.json(products);
   } catch (error) {
-    console.error(error);
+    console.error("GET PRODUCTS ERROR:", error);
     return NextResponse.json(
       { message: "Failed to fetch products" },
       { status: 500 }
     );
   }
 }
+
 
 export async function POST(request: Request) {
   try { 
