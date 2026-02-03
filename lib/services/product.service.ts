@@ -33,3 +33,36 @@ export async function createProduct(data: {
     stock_quantity,
   };
 }
+
+export async function updateProduct(
+  id: number,
+  data: Partial<{
+    name: string;
+    category: string;
+    unit: string;
+    price: number;
+    stock_quantity: number;
+  }>
+) {
+  const fields = Object.keys(data);
+  const values = Object.values(data);
+
+  if (fields.length === 0) {
+    throw new Error("No fields to update");
+  }
+
+  const setClause = fields.map(field => `${field} = ?`).join(", ");
+
+  await pool.query(
+    `UPDATE products SET ${setClause} WHERE id = ?`,
+    [...values, id]
+  );
+
+  return { id, ...data };
+}
+
+
+export async function deleteProduct(id: number) {
+  await pool.query(`DELETE FROM products WHERE id = ?`, [id]);
+  return { id };
+}
