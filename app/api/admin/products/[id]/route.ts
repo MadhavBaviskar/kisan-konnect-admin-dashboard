@@ -3,16 +3,21 @@ import {
   updateProduct,
   deleteProduct,
 } from "@/lib/services/product.service";
+import { verifyAdminToken } from "@/lib/auth";
 import pool from "@/lib/db";
 
 /* =========================
    GET /api/admin/products/:id
-   ========================= */
+   (Protected)
+========================= */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 🔐 JWT protection
+    verifyAdminToken(request.headers.get("authorization"));
+
     const { id } = await params;
     const productId = Number(id);
 
@@ -36,8 +41,16 @@ export async function GET(
     }
 
     return NextResponse.json(rows[0]);
-  } catch (error) {
+  } catch (error: any) {
     console.error("GET BY ID ERROR:", error);
+
+    if (error.message?.includes("token")) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { message: "Failed to fetch product" },
       { status: 500 }
@@ -47,13 +60,17 @@ export async function GET(
 
 /* =========================
    PUT /api/admin/products/:id
-   ========================= */
+   (Protected)
+========================= */
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params; // ✅ correct async params handling
+    // 🔐 JWT protection
+    verifyAdminToken(request.headers.get("authorization"));
+
+    const { id } = await params;
     const productId = Number(id);
 
     if (isNaN(productId)) {
@@ -64,12 +81,19 @@ export async function PUT(
     }
 
     const body = await request.json();
-
     const updatedProduct = await updateProduct(productId, body);
 
     return NextResponse.json(updatedProduct);
-  } catch (error) {
+  } catch (error: any) {
     console.error("PUT ERROR:", error);
+
+    if (error.message?.includes("token")) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { message: "Failed to update product" },
       { status: 500 }
@@ -79,12 +103,16 @@ export async function PUT(
 
 /* =========================
    DELETE /api/admin/products/:id
-   ========================= */
+   (Protected)
+========================= */
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 🔐 JWT protection
+    verifyAdminToken(request.headers.get("authorization"));
+
     const { id } = await params;
     const productId = Number(id);
 
@@ -101,8 +129,16 @@ export async function DELETE(
       { message: "Product deleted successfully" },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("DELETE ERROR:", error);
+
+    if (error.message?.includes("token")) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { message: "Failed to delete product" },
       { status: 500 }
